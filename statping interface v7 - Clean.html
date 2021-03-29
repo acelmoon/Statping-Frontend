@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<!Version Log:
+v1- Implemented service status interface
+v2- Category sorting
+v3- Alphabetical sorting
+v4- Interface scalable width and daynight mode
+v5- Reloads service status every 60 secs
+v6- Tooltip and open URL on click
+v7- Group loads from Statping instead of being manually defined
+>
+<!
+Version: v7
+Last edited date: Apr 24, 2020
+Last edited by: Dhamachart Angkasuwapala (acemoon_da@outlook.com)
+>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>Service Status</title>
+
+	<style type="text/css">
+
+		.container { /* table container */
+			max-width: 95%; /* max width of container */
+			//padding: 0 15px;
+			//margin: 0 auto;
+			width: auto; /* width of container */
+			margin: auto;
+			overflow: hidden;
+			margin-top: 20px;
+		}
+
+		body {
+			background-color: slategrey;
+			font: 300 20px/1.6 'Roboto', sans-serif;
+			/* fontType? fontSize/spacing fontType*/
+		}
+		
+		.buttonMode{
+			position: absolute; //set absolute position;
+			top: 0px; //set to top 0px margin;
+			right: 0px; //set to right 0px margin;
+			background-color: white; //set button color;
+			color: black; //set button font color;
+			border: none;
+			padding: 2px 3px 2px 4px;
+			text-align: center;
+			font-size: 10px;
+			cursor: pointer;
+		}
+		
+		.buttonMode:hover {
+			background-color: grey;
+		}
+		
+		.buttonGmail{
+			position: absolute; //set absolute position;
+			top: 16px; //set to top 0px margin;
+			right: 0px; //set to right 0px margin;
+			background-color: white; //set button color;
+			color: black; //set button font color;
+			border: none;
+			padding: 2px 3px 2px 3px;
+			text-align: center;
+			font-size: 10px;
+			cursor: pointer;
+		}
+
+		.buttonGmail:hover {
+			background-color: grey;
+		}
+
+		h2 { /* Category Header */
+			font-size: 28px;
+			font-weight: 5000;
+			padding: 20px 0 20px;
+			text-align:center;
+			//text-transform: uppercase;
+			color: white;
+		}
+
+		.container ul{
+			padding: 0px;
+			//margin: auto;
+			//display: inline;
+		}
+
+		.container ul li{
+			float: left;
+			list-style: none;
+			max-width: 225px;
+			width: 200%; /* width of status node */
+			height: 100px;
+			background: black;
+			margin :20px 0px 20px 40px;
+			//border: 5px solid white;
+			//border-style:outset;
+			border-radius:30px;
+			box-sizing: border-box;
+			position: relative;
+		}
+
+		.container ul li:hover{
+			//opacity: 0.8;
+			//border: 2px transparent white;
+			background: midnightblue;
+		}
+
+		.container ul li .tooltiptext {
+			visibility: hidden;
+			width: 240px;
+			background-color: #555;
+			color: #fff;
+			text-align: center;
+			border-radius: 6px;
+			padding: 5px 0;
+			/* Position of tooltip text*/
+			position: absolute;
+			z-index: 1;
+			bottom: 105%;
+			left: 50%;
+			margin-left: -120px;
+			/* Fade in tooltip */
+			opacity: 0;
+			transition: opacity 0.3s;
+		}
+
+		.container ul li .tooltiptext::after {
+			content: "";
+			position: absolute;
+			top: 100%;
+			left: 50%;
+			margin-left: -5px;
+			border-width: 5px;
+			border-style: solid;
+			border-color: #555 transparent transparent transparent;
+		}
+
+		.container ul li:hover .tooltiptext {
+			visibility: visible;
+			opacity: 0.85;
+		}
+
+		.container ul li .top{
+			//width: 100%;
+			height:44px;
+			line-height: 44px;
+			background: none;
+			text-align: center;
+			color: white;
+			font-size: 20px;
+			font-weight: bold;
+		}
+
+		.container ul li .bot{
+			//width: 100%;
+			height:56px;
+			line-height: 54px;
+			text-align: center;
+			background: grey;
+			color:white;
+			font-size: 30px;
+			border-radius:25px;
+		}
+    
+		.container ul li .bot-on{
+			//width: 100%;
+			height:56px;
+			line-height: 54px;
+			text-align: center;
+			background: limegreen;
+			color:white;
+			font-size: 30px;
+			border-radius:25px;
+		}
+
+		.container ul li .bot-off{
+			//width: 100%;
+			height:56px;
+			line-height: 54px;
+			text-align: center;
+			background: red;
+			color: black;
+			font-size: 30px;
+			border-radius:25px;
+		}
+
+		.container ul li .bot-delay{
+			//width: 100%;
+			height:56px;
+			line-height: 54px;
+			text-align: center;
+			background: grey;
+			color:white;
+			font-size: 30px;
+			border-radius:25px;
+		}
+
+		@media screen and (max-width:1250px){
+		.container ul li{
+			//width:40%;
+			//margin: auto;
+			margin-left: 40px;
+			margin-right: 0px;
+		}
+		}
+
+	</style>
+</head>
+
+<body>
+  <div class="statusPage">
+	<button class="buttonMode" onclick="DayNightMode(this)">Mode</button> <!DayNight mode switch>
+	<button class="buttonGmail" onclick="openURL('https://gmail.com')">Gmail</button> <!open Gmail>
+	<div class="statusNodes">
+		<div class="container"><!container for services>
+			<h2 class="header">Service Status</h2><!section header>
+			<ul class="serviceStatus"><!list of services>
+				<li><span class="tooltiptext">Tooltip text</span><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+			</ul>
+		</div>
+		<div class="container"><!container for services>
+			<h2 class="header">Service Status</h2><!section header>
+			<ul class="devStatus"><!list of services>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+			</ul>
+		</div>
+		<div class="container"><!container for services>
+			<h2 class="header">Service Status</h2><!section header>
+			<ul class="vpnStatus"><!list of services>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+				<li><div class="top">service</div><div class="bot">Status</div></li><!sample>
+			</ul>
+		</div>
+	</div>
+  </div>
+
+  <script>
+	var startAsDay=false; //start the page in day mode, true = start as day, false = start as night
+	var night=true; //starting boolean for daynight mode, true = night mode, false = day mode
+	//Changes page mode between day (light) and night (dark)
+	function DayNightMode(element){ 
+		let header=document.querySelectorAll('h2'); //define all headers(h2) as an array of elements, this is for changing header colors
+		if(night){ //if night mode (default mode) is on, turn to day mode
+			//turn to day mode
+			element.style.color = 'white'; //change button font color to white
+			element.style.backgroundColor = 'black'; //change button background color to black
+			document.body.style.backgroundColor = 'ghostwhite'; //white background
+			header.forEach(header => header.style.color='black'); //change all header(h2) font color to black
+			night=false;
+		}
+		else{ //if night mode is off, turn to night mode
+			//turn to night mode
+			element.style.color = 'black'; //change button font color to black
+			element.style.backgroundColor = 'white'; //change button background color to white
+			document.body.style.backgroundColor = 'slategrey'; //black background
+			header.forEach(header => header.style.color='white'); //change all header(h2) font color to white
+			night=true;
+		}
+	}
+	
+	function openURL(url){
+		window.open(url); //open URL in a new window
+	}
+	
+	var refreshInterval=60; //Get service status interval refresh in seconds
+	function getStatus(){
+		//variables for grabbing http request
+		var xhrServices = new XMLHttpRequest();
+		var xhrGroups = new XMLHttpRequest();
+		
+		//get json file from statping
+		xhrServices.open('GET', ''); // using GET method, we get data from flight.json
+		xhrGroups.open('GET', ''); // using GET method, we get data from flight.json
+		
+		xhrServices.onreadystatechange = function() {
+			if(xhrServices.readyState==4 && xhrGroups.readyState==4) { // request finished and response is now ready
+
+				//variables
+				var groups = JSON.parse(xhrGroups.responseText); // data is ready to be displayed. We'll see in console log
+				var services = JSON.parse(xhrServices.responseText); // data is ready to be displayed. We'll see in console log
+				var arrayGroups=[]; //array for objGroup
+				var specificgroupID=0; //for specifying a group id, this is for running line 321
+				var naStatusHTML = '<div class="container"><h2>Undefined Services</h2><ul>'; //HTML node for undefined services
+				var undefineServices = false; //boolean that controls undefined service list
+				
+				//Sort groups array by name (groups[i].name)
+				//https://stackoverflow.com/questions/6712034/sort-array-by-firstname-alphabetically-in-javascript
+				groups.sort(function(a, b){
+					if(a.name < b.name) { return -1;} //return -1 on this line to sort by ascending (A-Z)
+					if(a.name > b.name) { return 1;} //return -1 on this line to sort by descending (Z-A)
+					return 0;}
+				)
+				
+				//Clear status node
+				document.querySelector('.statusNodes').innerHTML = '';
+				
+				for(var i=0;i<groups.length;i++){
+					//Create object array
+					var objGroup={id:groups[i].id, name:groups[i].name+'Status', html:''};
+					arrayGroups.push(objGroup);
+					
+					//Create service categories
+					var groupHTML='<div class="container"><!container for '+groups[i].name+' services>';
+					groupHTML+='<h2 class="header">'+groups[i].name+' Service Status</h2><!section header>';
+					groupHTML+='<ul class="'+groups[i].name+'Status"><!list of services, id: '+ groups[i].id +'></ul></div>';
+					
+					//Add to status page
+					document.querySelector('.statusNodes').innerHTML += groupHTML;
+					
+					//Grabs a specific group id, used for not setting on click link and tooltip on specific nodes
+					if(groups[i].name=='SPECIAL'){
+						specificgroupID=groups[i].id; 
+						//console.log(groups[i].id); //Debug output
+					} 
+					
+					//Debugging output
+					//console.log(groupHTML);
+					//console.log(arrayGroups);
+				}
+				
+				//Sort services array by name (services[i].name)
+				//https://stackoverflow.com/questions/6712034/sort-array-by-firstname-alphabetically-in-javascript
+				services.sort(function(a, b){
+					if(a.name < b.name) { return -1;} //return -1 on this line to sort by ascending (A-Z)
+					if(a.name > b.name) { return 1;} //return -1 on this line to sort by descending (Z-A)
+					return 0;}
+				)
+				//console.log(services[0]);
+		
+				for(var i = 0; i < services.length; i++) {
+					//Variable to store node HTML string
+					var statusHTML = '<li';
+					
+					//Add on click link and tooltip for services not in a specific group id
+					if(services[i].group_id != specificgroupID){
+						statusHTML+=' onClick="openURL('+"'http://"+services[i].permalink+"'"+')"'; //on click, opens the URL of the service
+						statusHTML+='>';
+						statusHTML+='<span class="tooltiptext">URL:'+ services[i].permalink +'</span>'; //tooltip showing the URL of the service
+					}
+					else {
+						statusHTML+='>';
+					}
+					
+					//Create the node with service status
+					statusHTML += '<div class="top">' + services[i].name + '</div>'; //Service Name
+					if(services[i].online === true) {
+						statusHTML += '<div class="bot-on">ONLINE</div>'; //status ONLINE
+					}
+					else if(services[i].online === false) {
+						statusHTML += '<div class="bot-off">OFFLINE</div>'; //status OFFLINE
+					}
+					else if(services[i].online === 'false') {
+						statusHTML += '<div class="bot-delay">' + services[i].online + '</div>'; //status delay?
+					}
+					else {
+						statusHTML += '<div class="bot">' + services[i].online + '</div>'; //default status
+					}
+					statusHTML += '</li>';
+					
+					//Sort status HTML into it's correct categories
+					for(var j=0;j<arrayGroups.length;j++){
+						//arrayGroups contains multiple objGroup with the following values = {id: id number, name: category name +Status, html:node html}
+						if(services[i].group_id==arrayGroups[j].id){ //If the group id is the same then:
+							arrayGroups[j].html+=statusHTML; //Add status HTML into node html in group object
+						//Service HTML console output for debugging
+							//console.log(arrayGroups[j].name+': '+statusHTML);
+						}
+						else if (services[i].group_id==0){ naStatusHTML += statusHTML; undefineServices =true;} //else sort into undefine(N/A) services
+						
+						//Debugging output
+						//console.log('SERVICE group id: '+services[i].group_id+' CATEGORY group id: '+arrayGroups[j].id);
+						//console.log(services[i].group_id==arrayGroups[j].id);
+					}
+				}
+				
+				//Input services HTML into it's correct categories
+				for(var i=0;i<arrayGroups.length;i++){
+					//Grab HTML from objGroup.html and pass it into querySelector through objGroup.name
+					document.querySelector('.'+arrayGroups[i].name).innerHTML = arrayGroups[i].html;
+				}
+				//if undefineServices boolean is true, run it through querySelector
+				if(undefineServices){ document.querySelector('.statusNodes').innerHTML += naStatusHTML + '</ul></div>';}
+				//undefined services category will only show up if there's something in it
+				
+				//Check if the user wants to start the interface as day mode or not, if yes run the daynight function to swap to day mode
+				if(startAsDay&&night){
+					DayNightMode(document.getElementsByClassName("buttonMode")[0]);
+					startAsDay=false;
+				}
+			}
+		}
+		xhrServices.send();
+		xhrGroups.send();
+		console.log('Service Status Fetch Complete'); //confirmation output
+	}
+	
+	getStatus(); //Initial run on load
+	setInterval(getStatus, refreshInterval * 1000); //Refreshes service status every 60 secs
+
+  </script>
+</body>
+</html>
